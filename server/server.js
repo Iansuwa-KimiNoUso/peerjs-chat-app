@@ -25,27 +25,61 @@ function connect() {
 }
 
 function sendMessage() {
-    const message = {
-        sender: myId,
-        text: '',
-        dateSend: new Date()
-    };
     if (!peerConn) {
         throw new Error('Not connected to a peer');
     }
-    const text = document.querySelector('#textarea').value;
 
-    if (!text.length) {
-        alert('You cannot send an empty message!'); 
+    const message = {
+        sender: myId,
+        text: document.querySelector('#textarea').value.trim(),
+        dateSent: new Date()
+    };
+
+    if (!message.text.length) {
+        alert('You cannot send an empty message!');
         return false;
     }
 
-    message.text = text.trim();
+    createMessageComponent(message);
     peerConn.send(message);
 }
 
 function receiveMessage(message) {
-    console.log(message);
-    conversationMessage = null;
-    //document.querySelector('#conversation').innerHTML += 
+    createMessageComponent(message);
+}
+
+function createMessageComponent({ sender, text, dateSent }, ) {
+    const chatContent = document.querySelector('#chat-content');
+    const cardContentDiv = createElement({
+        attrs: {
+            class: 'card-content white-text',
+            title: dateSent,
+            left: 0
+        }
+    });
+    const senderSpan = createElement({
+        name: 'span',
+        text: sender
+    });
+    const messageDiv = createElement({ text });
+    const cardContentChildren = [
+        senderSpan, messageDiv
+    ];
+    cardContentChildren.forEach(element => cardContentDiv.appendChild(element));
+    chatContent.appendChild(cardContentDiv);
+}
+
+function createElement({ name = 'div', attrs = {}, text = '' }) {
+    const element = document.createElement(name);
+
+    Object.keys(attrs).forEach(key => {
+        element.setAttribute(key, attrs[key]);
+    });
+
+    if (text.length) {
+        const textNode = document.createTextNode(text);
+        element.appendChild(textNode);
+    }
+
+    return element;
 }
